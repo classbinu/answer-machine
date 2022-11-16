@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>대답 자판기</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@2.39.0/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div class="text-center my-10">
+        <h1 class="text-5xl mb-2">대답 자판기</h1>
+        <p class="text-primary">
+          '네', '아니오'로 대답할 수 있는 질문을 해주세요
+        </p>
+      </div>
+      <div v-if="isLoading" class="text-xl text-center text-primary my-20">
+        대답을 기다리는 중...
+      </div>
+      <div v-else>
+        <div class="flex justify-center">
+          <form @submit.prevent="askAnswer">
+            <input
+              type="text"
+              placeholder="ex) 지금 라면을 먹을까요?"
+              class="input input-bordered input-primary w-full max-w-xs"
+              v-model="question"
+            />
+            <button class="btn btn-block btn-primary mt-2">물어보기</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="divider my-10">결과</div>
+
+      <div div v-show="!isLoading" class="text-center">
+        <div class="text-6xl text-primary">{{ answer }}</div>
+        <div class="flex justify-center my-10">
+          <img :src="image" :alt="answer" width="300" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  const { createApp } = Vue;
+  createApp({
+    data() {
+      return {
+        isLoading: false,
+        question: "",
+        answer: "",
+        image: "",
+      };
+    },
+    methods: {
+      askAnswer() {
+        this.isLoading = true;
+        axios
+          .get("https://yesno.wtf/api")
+          .then((response) => {
+            setTimeout(() => (this.isLoading = false), 3000);
+            this.answer = response.data.answer;
+            this.image = response.data.image;
+          })
+          .catch((error) => {
+            this.isLoading = false;
+            alert(`[API ERROR]${error}`);
+          });
+      },
+    },
+  }).mount("#app");
+</script>
